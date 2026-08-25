@@ -99,6 +99,7 @@ button:focus-visible{outline:3px solid #4a7fd4;outline-offset:2px}
 .binbtn:active{transform:translateY(2px);box-shadow:none}
 .binbtn svg{width:50px;height:50px}
 .binbtn small{font-size:9.5px;font-weight:500;color:var(--sub)}
+.bins.notips .binbtn small{display:none}
 .binbtn.wide{grid-column:1/-1;width:calc(50% - 4.5px);margin:0 auto}
 .bins.lock .binbtn{pointer-events:none;opacity:.45}
 .bins.lock .binbtn.right{opacity:1;border-color:var(--ok);background:var(--okbg)}
@@ -378,7 +379,7 @@ function renderQ(){
 
 function renderBins(){
   const wrap = $("bins");
-  wrap.className = "bins";
+  wrap.className = "bins" + (st.mode === "test" ? " notips" : "");
   wrap.innerHTML = "";
   BIN_ORDER.forEach((id, idx)=>{
     const b = BINS[id];
