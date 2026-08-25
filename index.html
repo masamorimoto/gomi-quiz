@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#efece3">
+<title>感染性廃棄物クイズ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
+<style>
+:root{
+  --ink:#3d3a36; --paper:#efece3; --card:#fffdf8; --line:#e3ddcd; --sub:#8a8577;
+  --shadow:#ddd6c2;
+  --ok:#3e9b6c; --okbg:#e6f3ea; --ng:#d94a3a; --ngbg:#fbe9e5;
+  --chip:#fdf3d5;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
+  -webkit-font-smoothing:antialiased; line-height:1.6;
+}
+#app{max-width:430px;margin:0 auto;padding:14px 14px 48px;min-height:100dvh}
+.scr{display:none}
+.scr.active{display:block;animation:pop .18s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.scr.active{animation:none}}
+
+/* ---------- 共通部品 ---------- */
+button{font:inherit;color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid #4a7fd4;outline-offset:2px}
+.btn{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--card);border:2.5px solid var(--ink);border-radius:16px;
+  padding:12px 14px;font-weight:700;font-size:15.5px;
+  box-shadow:0 3px 0 var(--shadow);
+}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn .ic{
+  flex:0 0 42px;width:42px;height:42px;border-radius:13px;border:2.5px solid var(--ink);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;
+}
+.btn .bd{flex:1}
+.btn small{display:block;font-size:11.5px;font-weight:500;color:var(--sub);line-height:1.4}
+.ghost{
+  background:none;border:none;box-shadow:none;font-weight:700;font-size:14px;
+  color:var(--sub);padding:8px 10px;border-radius:10px;
+}
+.ghost:active{background:#e6e1d2}
+.primary{
+  display:block;width:100%;background:var(--ink);color:#fffdf8;border:2.5px solid var(--ink);
+  border-radius:14px;padding:12px;font-weight:800;font-size:15.5px;box-shadow:0 3px 0 var(--shadow);
+}
+.primary:active{transform:translateY(2px);box-shadow:none}
+.stack{display:flex;flex-direction:column;gap:11px}
+
+/* ---------- ホーム ---------- */
+.hero{text-align:center;padding:20px 0 14px}
+.hero .binrow{display:flex;justify-content:center;gap:2px;margin-bottom:6px}
+.hero .binrow svg{width:52px;height:52px}
+.hero h1{font-size:25px;font-weight:800;margin:0;letter-spacing:.02em}
+.hero .tagline{
+  display:inline-block;margin-top:6px;font-size:12.5px;font-weight:700;color:#6b6152;
+  background:var(--chip);border-radius:10px;padding:3px 12px;
+}
+.homefoot{margin-top:26px;font-size:10.5px;color:var(--sub);text-align:center;line-height:1.7}
+
+/* ---------- クイズ ---------- */
+.qhead{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.qhead .mode{font-weight:800;font-size:14px}
+.qhead .spacer{flex:1}
+.qhead .score{font-weight:800;font-size:14px;background:var(--card);border:2px solid var(--ink);border-radius:10px;padding:2px 10px}
+.track{height:10px;background:#e3ddcd;border-radius:6px;overflow:hidden;margin-bottom:12px}
+.track .fill{height:100%;width:0%;background:var(--ok);border-radius:6px;transition:width .25s}
+.track .fill.time{background:var(--ng);transition:width .1s linear}
+.qcard{
+  position:relative;background:var(--card);border:2.5px solid var(--ink);border-radius:20px;
+  padding:16px 14px 14px;text-align:center;box-shadow:0 4px 0 var(--shadow);
+}
+.qcard .lead{font-size:12px;font-weight:700;color:var(--sub);margin:0}
+.iconwrap{position:relative;display:inline-block;width:92px;height:92px;margin-top:2px}
+.iconwrap svg.main{width:92px;height:92px}
+.iconwrap .drop{position:absolute;top:-2px;right:-10px;width:26px;height:26px;display:none}
+.qname{font-size:21px;font-weight:800;margin:2px 0 6px;line-height:1.35}
+.qsitu{
+  display:inline-block;background:var(--chip);border-radius:10px;padding:4px 12px;
+  font-size:13.5px;font-weight:700;color:#6b6152;line-height:1.5;
+}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.binbtn{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  background:var(--card);border:2.5px solid var(--ink);border-radius:14px;
+  padding:7px 4px 6px;font-weight:700;font-size:12.5px;line-height:1.3;
+  box-shadow:0 3px 0 var(--shadow);
+}
+.binbtn:active{transform:translateY(2px);box-shadow:none}
+.binbtn svg{width:50px;height:50px}
+.binbtn small{font-size:9.5px;font-weight:500;color:var(--sub)}
+.binbtn.wide{grid-column:1/-1;width:calc(50% - 4.5px);margin:0 auto}
+.bins.lock .binbtn{pointer-events:none;opacity:.45}
+.bins.lock .binbtn.right{opacity:1;border-color:var(--ok);background:var(--okbg)}
+.bins.lock .binbtn.picked-wrong{opacity:1;border-color:var(--ng);background:var(--ngbg)}
+.fb{border-radius:16px;padding:12px 13px;margin-top:12px;border:2.5px solid;text-align:left}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.ng{background:var(--ngbg);border-color:var(--ng)}
+.fb .verdict{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:800;margin-bottom:4px}
+.fb.ok .verdict{color:var(--ok)}
+.fb.ng .verdict{color:var(--ng)}
+.fb .mark{font-size:22px}
+.fb .correct{display:flex;align-items:center;gap:7px;font-weight:800;font-size:14px;margin:4px 0}
+.fb .correct svg{width:34px;height:34px}
+.fb .expl{font-size:13.5px;line-height:1.7;margin:4px 0 10px}
+.toast{
+  text-align:center;font-weight:800;font-size:15px;border-radius:12px;
+  padding:7px;margin-top:12px;display:none;
+}
+.toast.ok{display:block;background:var(--okbg);color:var(--ok)}
+.toast.ng{display:block;background:var(--ngbg);color:var(--ng)}
+
+/* ---------- 結果 ---------- */
+.resulthead{text-align:center;padding:14px 0 6px}
+.stamp{
+  display:inline-block;font-size:26px;font-weight:800;padding:8px 26px;border-radius:14px;
+  border:3.5px solid;transform:rotate(-4deg);margin-bottom:10px;
+}
+.stamp.good{color:var(--ok);border-color:var(--ok);background:var(--okbg)}
+.stamp.bad{color:var(--ng);border-color:var(--ng);background:var(--ngbg)}
+.bigscore{font-size:40px;font-weight:800;line-height:1.2}
+.bigscore small{font-size:16px}
+.submsg{font-size:13.5px;font-weight:700;color:var(--sub)}
+.wronghead{font-size:14px;font-weight:800;margin:18px 0 8px}
+.wrongitem{
+  background:var(--card);border:2px solid var(--line);border-radius:14px;
+  padding:10px 12px;margin-bottom:9px;font-size:13px;line-height:1.65;
+}
+.wrongitem .t{font-weight:800;font-size:14px}
+.wrongitem .a{font-weight:800;color:var(--ok)}
+
+/* ---------- 図鑑 ---------- */
+.zcard{
+  display:flex;gap:12px;background:var(--card);border:2.5px solid var(--ink);
+  border-radius:18px;padding:13px;margin-bottom:11px;box-shadow:0 3px 0 var(--shadow);
+}
+.zcard svg{flex:0 0 76px;width:76px;height:76px}
+.zcard h3{margin:0 0 2px;font-size:15.5px}
+.zcard .zin{margin:0;padding-left:18px;font-size:12.5px;line-height:1.7}
+.zcard .warn{margin:5px 0 0;font-size:12px;font-weight:700;color:var(--ng);line-height:1.6}
+.pagehead{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.pagehead h2{font-size:18px;margin:0;flex:1}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="bin-cardboard" viewBox="0 0 200 200" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="100" cy="175" rx="56" ry="7" fill="#3d3a36" opacity="0.1"/><rect x="48" y="90" width="104" height="76" rx="4" fill="#d0a76b" stroke="#3d3a36" stroke-width="3"/><rect x="136" y="94" width="12" height="68" fill="#bd9155"/><rect x="42" y="72" width="116" height="24" rx="6" fill="#f4f1ea" stroke="#3d3a36" stroke-width="3"/><path d="M48,80 L152,80" stroke="#dcd7ca" stroke-width="2"/><g transform="translate(100,122) scale(0.95)" stroke="#ea7c2c" fill="none" stroke-width="3.4"><circle cx="-8.5" cy="-4.5" r="8.5"/><circle cx="8.5" cy="-4.5" r="8.5"/><circle cx="0" cy="9" r="8.5"/><circle cx="0" cy="0" r="3" fill="#ea7c2c" stroke="none"/></g><text x="100" y="157" font-family="Hiragino Maru Gothic ProN, Hiragino Sans, sans-serif" font-size="11.5" font-weight="700" fill="#ea7c2c" text-anchor="middle">医療廃棄物</text></symbol>
+<symbol id="bin-diaper" viewBox="0 0 200 200" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="100" cy="175" rx="56" ry="7" fill="#3d3a36" opacity="0.1"/><rect x="50" y="94" width="100" height="72" rx="4" fill="#d0a76b" stroke="#3d3a36" stroke-width="3"/><rect x="136" y="98" width="10" height="64" fill="#bd9155"/><rect x="44" y="74" width="112" height="26" rx="6" fill="#f4f1ea" stroke="#3d3a36" stroke-width="3"/><rect x="66" y="80" width="68" height="14" rx="3" fill="#f2d43c" stroke="#cfa910" stroke-width="1"/><text x="100" y="90.5" font-family="Hiragino Maru Gothic ProN, Hiragino Sans, sans-serif" font-size="9" font-weight="700" fill="#c0392b" text-anchor="middle">廃棄紙オムツ</text><text x="100" y="122" font-family="Hiragino Maru Gothic ProN, Hiragino Sans, sans-serif" font-size="11" font-weight="700" fill="#e08a2c" text-anchor="middle">紙おむつ専用</text><path d="M83,133 L117,133 Q116,140 113,146 Q107,157 100,157 Q93,157 87,146 Q84,140 83,133 Z" fill="#ffffff" stroke="#b98f52" stroke-width="2"/><path d="M83,139 L117,139" stroke="#b98f52" stroke-width="1.5"/><rect x="84" y="133" width="7" height="4" rx="1.5" fill="#e8dcc3"/><rect x="109" y="133" width="7" height="4" rx="1.5" fill="#e8dcc3"/></symbol>
+<symbol id="bin-general" viewBox="0 0 200 200" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="100" cy="175" rx="56" ry="7" fill="#3d3a36" opacity="0.1"/><path d="M56,84 L144,84 L136,166 Q135,170 130,170 L70,170 Q65,170 64,166 Z" fill="#ced3d7" stroke="#3d3a36" stroke-width="3"/><path d="M126,88 L136,88 L130,166 L121,166 Z" fill="#bcc2c7"/><path d="M56,84 Q60,102 72,99 Q80,108 91.0,102 Q100.0,112 111.0,102 Q120,108 128,99 Q140,102 144,84 Z" fill="#ffffff" opacity="0.92" stroke="#c9c4bb" stroke-width="2"/><ellipse cx="100" cy="84" rx="46" ry="10" fill="none" stroke="#e0b52c" stroke-width="6"/><ellipse cx="100" cy="84" rx="44" ry="9" fill="#eef1f2" stroke="#3d3a36" stroke-width="2.5"/><rect x="69" y="116" width="62" height="32" rx="5" fill="#ffffff" stroke="#b6bbc0" stroke-width="1.5"/><text x="100" y="137" font-family="Hiragino Maru Gothic ProN, Hiragino Sans, sans-serif" font-size="14" font-weight="700" fill="#d04a3a" text-anchor="middle">一般可燃</text></symbol>
+<symbol id="bin-haipura" viewBox="0 0 200 200" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="100" cy="175" rx="56" ry="7" fill="#3d3a36" opacity="0.1"/><rect x="54" y="84" width="92" height="84" rx="6" fill="#aab1b7" stroke="#3d3a36" stroke-width="3"/><rect x="132" y="88" width="10" height="76" rx="4" fill="#99a0a7"/><path d="M54,84 Q58,102 70,99 Q78,108 91.0,102 Q100.0,112 111.0,102 Q122,108 130,99 Q142,102 146,84 Z" fill="#ffffff" opacity="0.92" stroke="#c9c4bb" stroke-width="2"/><ellipse cx="100" cy="84" rx="46" ry="9" fill="#eef1f2" stroke="#3d3a36" stroke-width="2.5"/><rect x="70" y="114" width="60" height="32" rx="5" fill="#2e4a72" stroke="#223a5c" stroke-width="1.5"/><text x="100" y="135" font-family="Hiragino Maru Gothic ProN, Hiragino Sans, sans-serif" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">廃プラ</text></symbol>
+<symbol id="bin-pla-infectious" viewBox="0 0 200 200" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="100" cy="177" rx="56" ry="7" fill="#3d3a36" opacity="0.1"/><rect x="56" y="72" width="88" height="94" rx="10" fill="#f7f6f1" stroke="#3d3a36" stroke-width="3"/><rect x="50" y="58" width="100" height="22" rx="9" fill="#fbfaf6" stroke="#3d3a36" stroke-width="3"/><rect x="88" y="63" width="24" height="7" rx="3.5" fill="#e4e0d4"/><rect x="61" y="86" width="78" height="9" fill="#f0c93a"/><g transform="translate(100,122) scale(0.8)" stroke="#d9a516" fill="none" stroke-width="3.4"><circle cx="-8.5" cy="-4.5" r="8.5"/><circle cx="8.5" cy="-4.5" r="8.5"/><circle cx="0" cy="9" r="8.5"/><circle cx="0" cy="0" r="3" fill="#d9a516" stroke="none"/></g><text x="100" y="150" font-family="Hiragino Maru Gothic ProN, Hiragino Sans, sans-serif" font-size="9.5" font-weight="600" fill="#97917f" text-anchor="middle">感染性廃棄物</text><rect x="84" y="164" width="32" height="10" rx="4" fill="#aab1b7" stroke="#3d3a36" stroke-width="2.5"/></symbol>
+<symbol id="bin-sharps-red" viewBox="0 0 200 200" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="100" cy="168" rx="56" ry="7" fill="#3d3a36" opacity="0.1"/><rect x="44" y="78" width="112" height="84" rx="9" fill="#e0453c" stroke="#3d3a36" stroke-width="3"/><rect x="50" y="84" width="12" height="72" rx="6" fill="#c9382f"/><rect x="140" y="86" width="7" height="38" rx="3.5" fill="#ef6d60"/><rect x="38" y="56" width="124" height="28" rx="9" fill="#f4f1ea" stroke="#3d3a36" stroke-width="3"/><rect x="72" y="64" width="56" height="11" rx="5.5" fill="#4a4540"/><rect x="76" y="98" width="52" height="46" rx="5" fill="#f7dd6a" stroke="#d9b93c" stroke-width="1.5"/><g transform="translate(102,114) scale(0.5)" stroke="#4a4540" fill="none" stroke-width="3.4"><circle cx="-8.5" cy="-4.5" r="8.5"/><circle cx="8.5" cy="-4.5" r="8.5"/><circle cx="0" cy="9" r="8.5"/><circle cx="0" cy="0" r="3" fill="#4a4540" stroke="none"/></g><rect x="84" y="129" width="36" height="3.5" rx="1.75" fill="#8a8577"/><rect x="84" y="135" width="27" height="3.5" rx="1.75" fill="#8a8577"/></symbol>
+<symbol id="bin-sharps-yellow" viewBox="0 0 200 200" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="100" cy="168" rx="56" ry="7" fill="#3d3a36" opacity="0.1"/><path d="M58,68 Q100,22 142,68" stroke="#3d3a36" stroke-width="7" fill="none"/><path d="M58,68 Q100,22 142,68" stroke="#f4f1ea" stroke-width="3.5" fill="none"/><path d="M54,82 L146,82 L139,158 Q138,166 129,166 L71,166 Q62,166 61,158 Z" fill="#f7d33d" stroke="#3d3a36" stroke-width="3"/><path d="M128,86 L138,86 L132,162 L123,162 Z" fill="#e5bb2b"/><rect x="48" y="66" width="104" height="22" rx="10" fill="#f4f1ea" stroke="#3d3a36" stroke-width="3"/><rect x="84" y="54" width="32" height="16" rx="8" fill="#f4f1ea" stroke="#3d3a36" stroke-width="3"/><path d="M64,96 L136,96" stroke="#4a7fd4" stroke-width="3" stroke-dasharray="7 5"/><rect x="70" y="104" width="60" height="46" rx="5" fill="#ffffff" stroke="#d8cfae" stroke-width="1.5"/><rect x="74" y="108" width="52" height="9" rx="3" fill="#d94a3a"/><g transform="translate(100,131) scale(0.45)" stroke="#d94a3a" fill="none" stroke-width="3.4"><circle cx="-8.5" cy="-4.5" r="8.5"/><circle cx="8.5" cy="-4.5" r="8.5"/><circle cx="0" cy="9" r="8.5"/><circle cx="0" cy="0" r="3" fill="#d94a3a" stroke="none"/></g><rect x="82" y="142" width="36" height="3" rx="1.5" fill="#8a8577"/></symbol>
+<symbol id="item-ampoule" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="36" y="52" width="28" height="36" rx="8" fill="#cfe8f0" stroke="#3d3a36" stroke-width="2.5"/><path d="M44,52 L46,40 L54,40 L56,52 Z" fill="#cfe8f0" stroke="#3d3a36" stroke-width="2.5"/><rect x="42" y="25" width="16" height="16" rx="6" fill="#cfe8f0" stroke="#3d3a36" stroke-width="2.5"/><path d="M45,45 L55,45" stroke="#4a7fd4" stroke-width="2.5"/><path d="M42,60 L42,78" stroke="#ffffff" stroke-width="3" opacity="0.8"/></symbol>
+<symbol id="item-apron" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><path d="M28,54 L13,49 M72,54 L87,49" stroke="#3d3a36" stroke-width="2.5"/><path d="M42,15 Q50,8 58,15" fill="none" stroke="#3d3a36" stroke-width="2.5"/><path d="M42,14 L58,14 L58,34 L70,40 L70,88 L30,88 L30,40 L42,34 Z" fill="#d6eef7" stroke="#3d3a36" stroke-width="2.5"/><path d="M36,60 L36,80" stroke="#ffffff" stroke-width="3" opacity="0.8"/></symbol>
+<symbol id="item-blood-bag" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="40" y="14" width="20" height="14" rx="4" fill="#ffffff" stroke="#3d3a36" stroke-width="2.5"/><circle cx="50" cy="21" r="3.5" fill="#efece3" stroke="#3d3a36" stroke-width="2"/><rect x="30" y="26" width="40" height="52" rx="8" fill="#ffffff" stroke="#3d3a36" stroke-width="2.5"/><path d="M34,46 L66,46 L66,66 Q66,74 58,74 L42,74 Q34,74 34,66 Z" fill="#d94a3a"/><rect x="36" y="32" width="28" height="4" rx="2" fill="#c9c4bb"/><rect x="39" y="78" width="7" height="10" rx="2.5" fill="#ffffff" stroke="#3d3a36" stroke-width="2"/><rect x="54" y="78" width="7" height="10" rx="2.5" fill="#ffffff" stroke="#3d3a36" stroke-width="2"/></symbol>
+<symbol id="item-bottle-broken" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="32" y="38" width="36" height="48" rx="6" fill="#d9eef5" stroke="#3d3a36" stroke-width="2.5"/><rect x="40" y="24" width="20" height="14" rx="2" fill="#d9eef5" stroke="#3d3a36" stroke-width="2.5"/><rect x="37" y="14" width="26" height="10" rx="3" fill="#aab1b7" stroke="#3d3a36" stroke-width="2.5"/><rect x="38" y="54" width="24" height="18" rx="2" fill="#ffffff" stroke="#b9c0c6" stroke-width="1.5"/><rect x="42" y="59" width="16" height="3" rx="1.5" fill="#8a8577"/><path d="M40,46 L48,56 L42,64 L50,74" fill="none" stroke="#3d3a36" stroke-width="2"/><path d="M70,80 L79,86 L68,88 Z" fill="#d9eef5" stroke="#3d3a36" stroke-width="2"/></symbol>
+<symbol id="item-bottle" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="32" y="38" width="36" height="48" rx="6" fill="#d9eef5" stroke="#3d3a36" stroke-width="2.5"/><rect x="40" y="24" width="20" height="14" rx="2" fill="#d9eef5" stroke="#3d3a36" stroke-width="2.5"/><rect x="37" y="14" width="26" height="10" rx="3" fill="#aab1b7" stroke="#3d3a36" stroke-width="2.5"/><rect x="38" y="54" width="24" height="18" rx="2" fill="#ffffff" stroke="#b9c0c6" stroke-width="1.5"/><rect x="42" y="59" width="16" height="3" rx="1.5" fill="#8a8577"/></symbol>
+<symbol id="item-cup" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="30" y="26" width="40" height="9" rx="4.5" fill="#ffffff" stroke="#3d3a36" stroke-width="2.5"/><path d="M33,35 L67,35 L62,82 L38,82 Z" fill="#ffffff" stroke="#3d3a36" stroke-width="2.5"/><path d="M36,52 L64,52 L63,62 L37,62 Z" fill="#7fc8e3"/></symbol>
+<symbol id="item-diaper" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><path d="M22,34 L78,34 Q76,48 70,58 Q60,76 50,76 Q40,76 30,58 Q24,48 22,34 Z" fill="#ffffff" stroke="#3d3a36" stroke-width="2.5"/><path d="M23,44 L77,44" stroke="#d7dce0" stroke-width="2.5"/><rect x="24" y="31" width="11" height="7" rx="2.5" fill="#e8dcc3" stroke="#3d3a36" stroke-width="2"/><rect x="65" y="31" width="11" height="7" rx="2.5" fill="#e8dcc3" stroke="#3d3a36" stroke-width="2"/></symbol>
+<symbol id="item-dish" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><path d="M20,54 L20,60 Q20,71 50,71 Q80,71 80,60 L80,54" fill="#eef4f6" stroke="#3d3a36" stroke-width="2.5"/><ellipse cx="50" cy="54" rx="30" ry="9.5" fill="#f7fafb" stroke="#3d3a36" stroke-width="2.5"/><ellipse cx="50" cy="54" rx="21" ry="6" fill="#f2c94c" opacity="0.85"/></symbol>
+<symbol id="item-gauze" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="26" y="30" width="48" height="44" rx="6" fill="#ffffff" stroke="#3d3a36" stroke-width="2.5"/><path d="M26,44 L74,44" stroke="#d7dce0" stroke-width="2"/><path d="M32,54 L68,54 M32,62 L68,62" stroke="#e3e0d6" stroke-width="1.5" stroke-dasharray="4 3"/></symbol>
+<symbol id="item-glove" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="30" y="22" width="9" height="28" rx="4.5" fill="#9fd6ec" stroke="#3d3a36" stroke-width="2.5"/><rect x="41" y="18" width="9" height="30" rx="4.5" fill="#9fd6ec" stroke="#3d3a36" stroke-width="2.5"/><rect x="52" y="20" width="9" height="28" rx="4.5" fill="#9fd6ec" stroke="#3d3a36" stroke-width="2.5"/><rect x="63" y="26" width="8" height="24" rx="4" fill="#9fd6ec" stroke="#3d3a36" stroke-width="2.5"/><rect x="30" y="42" width="41" height="32" rx="10" fill="#9fd6ec" stroke="#3d3a36" stroke-width="2.5"/><g transform="rotate(-38 72 56)"><rect x="62" y="52" width="20" height="9" rx="4.5" fill="#9fd6ec" stroke="#3d3a36" stroke-width="2.5"/></g><rect x="34" y="74" width="33" height="12" rx="4" fill="#7fc8e3" stroke="#3d3a36" stroke-width="2.5"/></symbol>
+<symbol id="item-mask" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><path d="M26,42 Q8,50 26,60" fill="none" stroke="#3d3a36" stroke-width="2.5"/><path d="M74,42 Q92,50 74,60" fill="none" stroke="#3d3a36" stroke-width="2.5"/><rect x="26" y="34" width="48" height="34" rx="9" fill="#b8d9ee" stroke="#3d3a36" stroke-width="2.5"/><path d="M32,44 L68,44 M32,51 L68,51 M32,58 L68,58" stroke="#8fb8d8" stroke-width="2"/></symbol>
+<symbol id="item-needle" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><g transform="rotate(32 50 50)"><path d="M50,58 L50,18" stroke="#3d3a36" stroke-width="5.5"/><path d="M50,56 L50,20" stroke="#cfd4d8" stroke-width="2.5"/><path d="M50,13 L54,22 L46,22 Z" fill="#cfd4d8" stroke="#3d3a36" stroke-width="2"/><rect x="42" y="58" width="16" height="20" rx="4" fill="#8fd0e8" stroke="#3d3a36" stroke-width="2.5"/><rect x="39" y="76" width="22" height="9" rx="3" fill="#8fd0e8" stroke="#3d3a36" stroke-width="2.5"/></g></symbol>
+<symbol id="item-paper" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><g transform="rotate(7 48 46)"><rect x="32" y="20" width="36" height="48" rx="3" fill="#f2f0e8" stroke="#3d3a36" stroke-width="2"/></g><rect x="26" y="28" width="36" height="48" rx="3" fill="#ffffff" stroke="#3d3a36" stroke-width="2.5"/><path d="M32,40 L56,40 M32,48 L56,48 M32,56 L48,56" stroke="#c9c4bb" stroke-width="2"/></symbol>
+<symbol id="item-ptp" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="27" y="31" width="46" height="42" rx="4" fill="#dfe4e8" stroke="#3d3a36" stroke-width="2.5"/><circle cx="38" cy="43" r="5.5" fill="#f7f9fa" stroke="#aab1b7" stroke-width="2"/><circle cx="38" cy="60" r="5.5" fill="#f7f9fa" stroke="#aab1b7" stroke-width="2"/><circle cx="50" cy="43" r="5.5" fill="#f7f9fa" stroke="#aab1b7" stroke-width="2"/><circle cx="50" cy="60" r="5.5" fill="#f7f9fa" stroke="#aab1b7" stroke-width="2"/><circle cx="62" cy="43" r="5.5" fill="#f7f9fa" stroke="#aab1b7" stroke-width="2"/><circle cx="62" cy="60" r="5.5" fill="#b9c0c6" stroke="#aab1b7" stroke-width="2"/></symbol>
+<symbol id="item-scalpel" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><g transform="rotate(-40 50 50)"><rect x="12" y="45" width="38" height="9" rx="3.5" fill="#9aa1a7" stroke="#3d3a36" stroke-width="2.5"/><path d="M50,44 Q72,38 86,50 Q70,58 50,55 Z" fill="#e8ecef" stroke="#3d3a36" stroke-width="2.5"/></g></symbol>
+<symbol id="item-syringe" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><g transform="rotate(-18 50 50)"><path d="M22,50 L6,50" stroke="#3d3a36" stroke-width="4.5"/><path d="M20,50 L8,50" stroke="#cfd4d8" stroke-width="1.8"/><path d="M22,45 L14,48 L14,52 L22,55 Z" fill="#8fd0e8" stroke="#3d3a36" stroke-width="2"/><rect x="22" y="42" width="38" height="16" rx="3" fill="#eef4f6" stroke="#3d3a36" stroke-width="2.5"/><path d="M32,45 L32,55 M40,45 L40,55 M48,45 L48,55" stroke="#b9c0c6" stroke-width="1.5"/><rect x="60" y="36" width="6" height="28" rx="2" fill="#d7dce0" stroke="#3d3a36" stroke-width="2.5"/><rect x="66" y="47" width="16" height="6" rx="2" fill="#d7dce0" stroke="#3d3a36" stroke-width="2.5"/><rect x="82" y="41" width="6" height="18" rx="2" fill="#d7dce0" stroke="#3d3a36" stroke-width="2.5"/></g></symbol>
+<symbol id="item-test-tube" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><path d="M42,22 L42,70 Q42,82 50,82 Q58,82 58,70 L58,22 Z" fill="#eef4f6" stroke="#3d3a36" stroke-width="2.5"/><path d="M44.5,48 L44.5,69 Q44.5,79 50,79 Q55.5,79 55.5,69 L55.5,48 Z" fill="#d94a3a"/><rect x="37" y="14" width="26" height="9" rx="3.5" fill="#b48fd0" stroke="#3d3a36" stroke-width="2.5"/></symbol>
+<symbol id="item-tube" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><path d="M20,30 Q50,10 72,28 Q92,46 68,56 Q44,66 58,84" fill="none" stroke="#3d3a36" stroke-width="6.5"/><path d="M20,30 Q50,10 72,28 Q92,46 68,56 Q44,66 58,84" fill="none" stroke="#f0c96a" stroke-width="3.5"/><rect x="10" y="24" width="13" height="13" rx="3" fill="#8fd0e8" stroke="#3d3a36" stroke-width="2.5"/></symbol>
+<symbol id="item-vial" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><rect x="34" y="38" width="32" height="48" rx="6" fill="#d9eef5" stroke="#3d3a36" stroke-width="2.5"/><rect x="36" y="24" width="28" height="14" rx="3" fill="#aab1b7" stroke="#3d3a36" stroke-width="2.5"/><rect x="38" y="52" width="24" height="20" rx="2" fill="#ffffff" stroke="#b9c0c6" stroke-width="1.5"/><rect x="42" y="57" width="16" height="3" rx="1.5" fill="#8a8577"/><rect x="42" y="63" width="12" height="3" rx="1.5" fill="#8a8577"/></symbol>
+<symbol id="item-winged" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><g transform="rotate(-15 27 51)"><rect x="12" y="44" width="28" height="14" rx="5" fill="#8fd0e8" stroke="#3d3a36" stroke-width="2.5"/></g><g transform="rotate(15 73 51)"><rect x="60" y="44" width="28" height="14" rx="5" fill="#8fd0e8" stroke="#3d3a36" stroke-width="2.5"/></g><path d="M50,60 Q50,74 62,78 Q73,82 69,90" fill="none" stroke="#3d3a36" stroke-width="5.5"/><path d="M50,60 Q50,74 62,78 Q73,82 69,90" fill="none" stroke="#ece8dc" stroke-width="2.5"/><rect x="42" y="40" width="16" height="20" rx="4" fill="#6fbcd8" stroke="#3d3a36" stroke-width="2.5"/><path d="M50,40 L50,18" stroke="#3d3a36" stroke-width="5"/><path d="M50,38 L50,20" stroke="#cfd4d8" stroke-width="2"/><path d="M50,14 L53.5,22 L46.5,22 Z" fill="#cfd4d8" stroke="#3d3a36" stroke-width="2"/></symbol>
+<symbol id="item-wrapper" viewBox="0 0 100 100" stroke-linejoin="round" stroke-linecap="round"><path d="M26,34 L30,27 L34,34 L38,27 L42,34 L46,27 L50,34 L54,27 L58,34 L62,27 L66,34 L70,27 L74,34 L74,72 L26,72 Z" fill="#e9eef2" stroke="#3d3a36" stroke-width="2.5"/><path d="M34,64 L56,42 M44,66 L64,46" stroke="#ffffff" stroke-width="3" opacity="0.85"/></symbol>
+<symbol id="blood-drop" viewBox="0 0 24 24">
+  <path d="M12,2 Q19,11 19,16 A7,7 0 1,1 5,16 Q5,11 12,2 Z" fill="#d94a3a" stroke="#3d3a36" stroke-width="2" stroke-linejoin="round"/>
+</symbol>
+</defs>
+</svg>
+
+<div id="app">
+
+<!-- ホーム -->
+<section class="scr active" id="scr-home">
+  <div class="hero">
+    <div class="binrow" aria-hidden="true">
+      <svg><use href="#bin-sharps-red"/></svg>
+      <svg><use href="#bin-sharps-yellow"/></svg>
+      <svg><use href="#bin-general"/></svg>
+      <svg><use href="#bin-cardboard"/></svg>
+      <svg><use href="#bin-diaper"/></svg>
+    </div>
+    <h1>感染性廃棄物クイズ</h1>
+    <span class="tagline">このゴミ、どこに捨てる?</span>
+  </div>
+  <div class="stack">
+    <button class="btn" id="btn-practice">
+      <span class="ic" style="background:#cfe8f0">練</span>
+      <span class="bd">練習<small>カテゴリを選んで全問チャレンジ。解説付き</small></span>
+    </button>
+    <button class="btn" id="btn-test">
+      <span class="ic" style="background:#fdf3d5">試</span>
+      <span class="bd">テスト(10問)<small>ランダム10問。8問正解で合格!</small></span>
+    </button>
+    <button class="btn" id="btn-ta">
+      <span class="ic" style="background:#fbe0dc">速</span>
+      <span class="bd">タイムアタック<small>60秒で何問正解できる? ベスト: <span id="ta-best">0</span>問</small></span>
+    </button>
+    <button class="btn" id="btn-weak" hidden>
+      <span class="ic" style="background:#efe7f6">復</span>
+      <span class="bd">苦手復習<small>間違えた問題だけ: <span id="weak-count">0</span>問</small></span>
+    </button>
+    <button class="btn" id="btn-zukan">
+      <span class="ic" style="background:#e6f3ea">図</span>
+      <span class="bd">容器図鑑<small>7つの捨て先と入れてよいものを確認</small></span>
+    </button>
+  </div>
+  <p class="homefoot">
+    実際の運用は所属部署のルールとICTの指示に従ってください。
+  </p>
+</section>
+
+<!-- カテゴリ選択 -->
+<section class="scr" id="scr-cats">
+  <div class="pagehead">
+    <button class="ghost" data-home>← 戻る</button>
+    <h2>どのカテゴリにする?</h2>
+  </div>
+  <div class="stack" id="catlist"></div>
+</section>
+
+<!-- クイズ -->
+<section class="scr" id="scr-quiz">
+  <div class="qhead">
+    <button class="ghost" data-home aria-label="やめてホームへ">×</button>
+    <span class="mode" id="q-mode"></span>
+    <span class="spacer"></span>
+    <span class="score" id="q-score"></span>
+  </div>
+  <div class="track"><div class="fill" id="q-fill"></div></div>
+  <div class="qcard">
+    <p class="lead" id="q-no"></p>
+    <div class="iconwrap">
+      <svg class="main" id="q-icon-svg"><use id="q-icon" href="#item-gauze"/></svg>
+      <svg class="drop" id="q-drop" aria-label="血液付着"><use href="#blood-drop"/></svg>
+    </div>
+    <div class="qname" id="q-name"></div>
+    <div><span class="qsitu" id="q-situ"></span></div>
+  </div>
+  <div class="bins" id="bins"></div>
+  <div class="toast" id="toast"></div>
+  <div class="fb" id="fb" hidden>
+    <div class="verdict"><span class="mark" id="fb-mark"></span><span id="fb-word"></span></div>
+    <div class="correct" id="fb-correct"></div>
+    <p class="expl" id="fb-expl"></p>
+    <button class="primary" id="btn-next">次へ</button>
+  </div>
+</section>
+
+<!-- 結果 -->
+<section class="scr" id="scr-result">
+  <div class="resulthead" id="result-head"></div>
+  <div id="result-wrongs"></div>
+  <div class="stack" style="margin-top:16px">
+    <button class="primary" id="btn-retry">もう一回</button>
+    <button class="btn" data-home><span class="bd" style="text-align:center">ホームへ戻る</span></button>
+  </div>
+</section>
+
+<!-- 図鑑 -->
+<section class="scr" id="scr-zukan">
+  <div class="pagehead">
+    <button class="ghost" data-home>← 戻る</button>
+    <h2>容器図鑑</h2>
+  </div>
+  <div id="zukanlist"></div>
+  <p class="homefoot">迷ったら「感染性側」に捨てるのではなく、まず先輩やICTに確認を。<br>分別を正しくすると、針刺し事故と処理コストの両方を減らせます。</p>
+</section>
+
+</div>
+
+<script>
+"use strict";
+const QUESTIONS = [{"id": 1, "item": "注射針", "situ": "点滴の混注に使った(患者には未使用)", "icon": "needle", "blood": false, "ans": "akaHari", "lv": 2, "cat": "sharp", "expl": "患者に使っていない清潔な針は赤の針捨てへ。患者に使用した後なら黄色です。"}, {"id": 2, "item": "注射針", "situ": "患者に皮下注射をした後", "icon": "needle", "blood": false, "ans": "kiHari", "lv": 1, "cat": "sharp", "expl": "患者に使用した鋭利物は黄色の針捨てへ。使った人がその場で捨てます(リキャップ禁止)。"}, {"id": 3, "item": "アンプル", "situ": "薬剤調合で折った(患者未使用)", "icon": "ampoule", "blood": false, "ans": "akaHari", "lv": 1, "cat": "sharp", "expl": "調合で出たアンプルは清潔な鋭利物として赤へ。"}, {"id": 4, "item": "バイアル", "situ": "混注が終わった空きバイアル", "icon": "vial", "blood": false, "ans": "akaHari", "lv": 1, "cat": "sharp", "expl": "アンプル・バイアルも鋭利物扱い。患者に使っていなければ赤へ。"}, {"id": 5, "item": "注射器", "situ": "調剤に使い針を付けたまま(患者未使用)", "icon": "syringe", "blood": false, "ans": "akaHari", "lv": 2, "cat": "sharp", "expl": "調合で出た針付き注射器は赤へ。針を外さずそのまま捨ててOK。"}, {"id": 6, "item": "翼状針", "situ": "採血に使用した", "icon": "winged", "blood": false, "ans": "kiHari", "lv": 1, "cat": "sharp", "expl": "患者に使用した鋭利物は黄色へ。その場ですぐ捨てるのが原則。"}, {"id": 7, "item": "留置針の内針", "situ": "点滴ルートを確保したあと", "icon": "needle", "blood": false, "ans": "kiHari", "lv": 1, "cat": "sharp", "expl": "使用後の内針は黄色へ。処置台に置きっぱなしは針刺しのもと。"}, {"id": 8, "item": "インスリン注射の針", "situ": "患者に使用した", "icon": "needle", "blood": false, "ans": "kiHari", "lv": 1, "cat": "sharp", "expl": "小さくても使用済みの針は必ず黄色へ。"}, {"id": 9, "item": "縫合針", "situ": "創処置で使用した", "icon": "needle", "blood": false, "ans": "kiHari", "lv": 2, "cat": "sharp", "expl": "縫合針も患者に使用した鋭利物。黄色へ。"}, {"id": 10, "item": "メス刃", "situ": "処置で使用した", "icon": "scalpel", "blood": false, "ans": "kiHari", "lv": 2, "cat": "sharp", "expl": "メス刃などの鋭利物は黄色の針捨てへ。"}, {"id": 11, "item": "ガイドワイヤー", "situ": "長くて黄色ボックスに入らない", "icon": "tube", "blood": false, "ans": "plaKan", "lv": 2, "cat": "sharp", "expl": "黄色ボックスに入らない大きさの鋭利物はプラスチック容器へ。"}, {"id": 12, "item": "点滴ルート", "situ": "針が付いたまま", "icon": "tube", "blood": false, "ans": "plaKan", "lv": 3, "cat": "sharp", "expl": "針付きルートは無理に針を外さず、そのままプラスチック容器へ。外そうとすると針刺しの危険!"}, {"id": 13, "item": "ガラス瓶", "situ": "床に落として割れた(血液付着なし)", "icon": "bottle-broken", "blood": false, "ans": "plaKan", "lv": 3, "cat": "sharp", "expl": "血液がついていなくても、割れたガラスは感染性と同等扱い。プラスチック容器へ。"}, {"id": 14, "item": "ガーゼ", "situ": "血液が付着している", "icon": "gauze", "blood": true, "ans": "dan", "lv": 1, "cat": "kansen", "expl": "血液付きの衛生材料は段ボール容器(橙ハザード)へ。"}, {"id": 15, "item": "手袋", "situ": "創処置で使用した", "icon": "glove", "blood": false, "ans": "dan", "lv": 1, "cat": "kansen", "expl": "処置で使った手袋は段ボールへ。"}, {"id": 16, "item": "エプロン", "situ": "おむつ交換で使用した", "icon": "apron", "blood": false, "ans": "dan", "lv": 2, "cat": "kansen", "expl": "排泄ケア・処置で使ったエプロンは段ボールへ。"}, {"id": 17, "item": "マスク", "situ": "気管吸引の介助で使用した", "icon": "mask", "blood": false, "ans": "dan", "lv": 2, "cat": "kansen", "expl": "処置で使ったマスクは段ボールへ。"}, {"id": 18, "item": "吸引カテーテル", "situ": "痰の吸引に使った", "icon": "tube", "blood": false, "ans": "dan", "lv": 1, "cat": "kansen", "expl": "体に入れた管類は段ボールへ。"}, {"id": 19, "item": "ドレーン", "situ": "抜去したもの", "icon": "tube", "blood": false, "ans": "dan", "lv": 2, "cat": "kansen", "expl": "体内に入っていたドレーンは段ボールへ。"}, {"id": 20, "item": "輸血パック", "situ": "輸血が終わった空きパック", "icon": "blood-bag", "blood": false, "ans": "dan", "lv": 2, "cat": "kansen", "expl": "使用済みの輸血パックは段ボールへ。"}, {"id": 21, "item": "検尿カップ", "situ": "尿検査で使用した", "icon": "cup", "blood": false, "ans": "dan", "lv": 2, "cat": "kansen", "expl": "検体がついたカップは段ボールへ。飲み物の紙コップと区別!"}, {"id": 22, "item": "透析回路", "situ": "使用後(鋭利部分は外してある)", "icon": "tube", "blood": false, "ans": "dan", "lv": 3, "cat": "kansen", "expl": "鋭利物以外の透析回路は段ボールへ。"}, {"id": 23, "item": "採血スピッツ", "situ": "血液が入っている", "icon": "test-tube", "blood": false, "ans": "plaKan", "lv": 2, "cat": "kansen", "expl": "血液など液状のものはプラスチック容器へ。"}, {"id": 24, "item": "試験管", "situ": "検査で使ったガラス製", "icon": "test-tube", "blood": false, "ans": "plaKan", "lv": 2, "cat": "kansen", "expl": "ガラス製品はプラスチック容器へ。"}, {"id": 25, "item": "血液製剤の瓶", "situ": "使い終わったもの", "icon": "bottle", "blood": false, "ans": "plaKan", "lv": 2, "cat": "kansen", "expl": "瓶(ガラス)はプラスチック容器へ。"}, {"id": 26, "item": "黄色の針捨てボックス", "situ": "中身がいっぱいになった", "icon": "bin-sharps-yellow", "blood": false, "ans": "plaKan", "lv": 2, "cat": "kansen", "expl": "針捨てボックスは容器ごとプラスチック容器へ。中身の移しかえは絶対にしない。"}, {"id": 27, "item": "シャーレ", "situ": "検査で培養に使用した", "icon": "dish", "blood": false, "ans": "plaKan", "lv": 3, "cat": "kansen", "expl": "培地・シャーレなど病原微生物に関わるものはプラスチック容器へ。"}, {"id": 28, "item": "脱脂綿", "situ": "採血後の止血に使った", "icon": "gauze", "blood": true, "ans": "dan", "lv": 1, "cat": "kansen", "expl": "血液付きの綿は段ボールへ。"}, {"id": 29, "item": "ペーパータオル", "situ": "手洗い後に手を拭いた", "icon": "paper", "blood": false, "ans": "ippan", "lv": 1, "cat": "clean", "expl": "血液・体液がついていなければ一般可燃ごみへ。"}, {"id": 30, "item": "薬の説明書", "situ": "紙のもの", "icon": "paper", "blood": false, "ans": "ippan", "lv": 1, "cat": "clean", "expl": "ただの紙類は一般可燃へ。"}, {"id": 31, "item": "ガーゼの紙包装", "situ": "開封しただけ(中身は未使用)", "icon": "paper", "blood": false, "ans": "ippan", "lv": 1, "cat": "clean", "expl": "患者に触れていない包装紙は一般可燃へ。なんでも感染性に入れると処理コストが増えます。"}, {"id": 32, "item": "紙コップ", "situ": "休憩室でお茶に使った", "icon": "cup", "blood": false, "ans": "ippan", "lv": 1, "cat": "clean", "expl": "普通のごみ。医療行為に使っていなければ一般可燃へ。"}, {"id": 33, "item": "マスク", "situ": "事務作業中に着けていた(患者接触なし)", "icon": "mask", "blood": false, "ans": "dan", "lv": 3, "cat": "clean", "expl": "使用したマスクは、患者に接触していなくても段ボールへ。"}, {"id": 34, "item": "点滴バッグの外装袋", "situ": "未開封品からはがした", "icon": "wrapper", "blood": false, "ans": "haipura", "lv": 1, "cat": "clean", "expl": "清潔なプラ包装は廃プラへ。"}, {"id": 35, "item": "シリンジの包装", "situ": "未使用品の外装", "icon": "wrapper", "blood": false, "ans": "haipura", "lv": 1, "cat": "clean", "expl": "未使用品の包装は廃プラへ。"}, {"id": 36, "item": "PTPシート", "situ": "薬を取り出したあとの空シート", "icon": "ptp", "blood": false, "ans": "haipura", "lv": 2, "cat": "clean", "expl": "プラ製の空シートは廃プラへ。"}, {"id": 37, "item": "アルコール綿の空袋", "situ": "袋だけ(綿は使用した)", "icon": "wrapper", "blood": false, "ans": "haipura", "lv": 2, "cat": "clean", "expl": "袋自体は清潔なプラなので廃プラへ。使った綿のほうは血液がつけば段ボールです。"}, {"id": 38, "item": "紙おむつ", "situ": "尿のみ・感染症なし", "icon": "diaper", "blood": false, "ans": "omutsu", "lv": 1, "cat": "omutsu", "expl": "普通の使用済みおむつは、おむつ専用容器へ。"}, {"id": 39, "item": "紙おむつ", "situ": "血液が付着している", "icon": "diaper", "blood": true, "ans": "dan", "lv": 2, "cat": "omutsu", "expl": "血液付きのおむつは、おむつ専用ではなく段ボールへ。"}, {"id": 40, "item": "ノロウイルス疑いの患者のおむつ", "situ": "血液はついていない", "icon": "diaper", "blood": false, "ans": "dan", "lv": 3, "cat": "omutsu", "expl": "感染症(疑いを含む)の患者のおむつは段ボールへ。"}, {"id": 41, "item": "紙おむつ", "situ": "便あり(感染症なし・血液なし)", "icon": "diaper", "blood": false, "ans": "omutsu", "lv": 2, "cat": "omutsu", "expl": "尿や便はおむつの通常の中身なので、おむつ専用へ。血液や感染症があれば段ボールです。"}];
+const BINS = {"akaHari": {"name": "針捨て(赤)", "sub": "清潔な鋭利物", "sym": "bin-sharps-red"}, "kiHari": {"name": "針捨て(黄)", "sub": "患者使用の鋭利物", "sym": "bin-sharps-yellow"}, "dan": {"name": "段ボール容器", "sub": "感染性・固形", "sym": "bin-cardboard"}, "plaKan": {"name": "プラ容器(感染)", "sub": "液状・大きい鋭利物", "sym": "bin-pla-infectious"}, "ippan": {"name": "一般可燃ごみ", "sub": "非感染・紙など", "sym": "bin-general"}, "haipura": {"name": "廃プラ", "sub": "非感染・プラ包装", "sym": "bin-haipura"}, "omutsu": {"name": "おむつ専用", "sub": "血液・感染なし", "sym": "bin-diaper"}};
+const BIN_ORDER = ["akaHari", "kiHari", "dan", "plaKan", "ippan", "haipura", "omutsu"];
+const ZUKAN = [{"bin": "akaHari", "items": ["点滴作成・薬剤調合で出た針、注射器", "アンプル、バイアル"], "warn": "患者に使用した器材は入れない(黄色へ)。設置はナースステーション内(点滴作成台のそば)"}, {"bin": "kiHari", "items": ["患者に使用した注射針、留置針、翼状針", "縫合針、メス刃などの鋭利物"], "warn": "使った人がその場で捨てる(リキャップ禁止)。ナースステーションに持ち込まない"}, {"bin": "dan", "items": ["血液がついたガーゼ・脱脂綿など", "処置で使ったエプロン・ガウン・手袋", "使用したマスク(患者接触がなくても)", "カテーテル、ドレーン、透析回路(鋭利物以外)", "使用済み輸血パック、検尿カップ", "血液付き/感染症患者のおむつ"], "warn": "8割たまったら袋を閉じ、蓋に部署と日付を書いて所定の場所へ"}, {"bin": "plaKan", "items": ["血液・体液など液状/泥状のもの", "黄色ボックスに入らない鋭利物・針付きルート", "試験管・シャーレ・瓶などのガラス類", "いっぱいになった針捨てボックス(赤・黄)"], "warn": "8割で蓋をしっかり閉め、部署と日付を記載"}, {"bin": "ippan", "items": ["血液・体液がついていない紙類", "ペーパータオル、包装紙、紙コップ"], "warn": null}, {"bin": "haipura", "items": ["血液・体液がついていないプラスチック", "点滴の外袋、包装フィルム、PTPシート"], "warn": null}, {"bin": "omutsu", "items": ["使用済みの紙おむつ(尿・便)"], "warn": "血液付着、感染症(疑い含む)患者のものは段ボール容器へ"}];
+const CATS = [{"key": "all", "name": "すべて", "desc": "全カテゴリミックス", "mark": "全", "color": "#e6e1d2"}, {"key": "sharp", "name": "鋭利物", "desc": "針・メス・ガラス", "mark": "針", "color": "#fbe0dc"}, {"key": "kansen", "name": "感染性のごみ", "desc": "ガーゼ・管・液体など", "mark": "感", "color": "#fdebd7"}, {"key": "clean", "name": "普通のごみ", "desc": "紙・包装・プラ", "mark": "紙", "color": "#e3ecf3"}, {"key": "omutsu", "name": "おむつ", "desc": "場合分けに注意", "mark": "お", "color": "#f6efdf"}];
+
+const $ = id => document.getElementById(id);
+
+/* ---------- ストレージ ---------- */
+const store = {
+  data: { wrong: {}, bestTA: 0 },
+  load(){ try{ const raw = localStorage.getItem("wasteQuiz.v1"); if(raw) this.data = Object.assign(this.data, JSON.parse(raw)); }catch(e){} },
+  save(){ try{ localStorage.setItem("wasteQuiz.v1", JSON.stringify(this.data)); }catch(e){} },
+  addWrong(id){ this.data.wrong[id] = (this.data.wrong[id]||0)+1; this.save(); },
+  clearWrong(id){ if(this.data.wrong[id]){ delete this.data.wrong[id]; this.save(); } },
+  weakIds(){ return Object.keys(this.data.wrong); }
+};
+store.load();
+
+/* ---------- 画面切替 ---------- */
+function show(id){
+  document.querySelectorAll(".scr").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function goHome(){
+  stopTimer();
+  $("ta-best").textContent = store.data.bestTA;
+  const n = store.weakIds().length;
+  $("weak-count").textContent = n;
+  $("btn-weak").hidden = n === 0;
+  show("scr-home");
+}
+document.querySelectorAll("[data-home]").forEach(b=>b.addEventListener("click", goHome));
+
+/* ---------- 出題状態 ---------- */
+const TA_SECONDS = 60;
+let st = null;   // {mode, pool, i, score, wrongs, answered, left, tick}
+let timer = null;
+
+function shuffle(a){
+  a = a.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+
+function start(mode, pool, label){
+  st = { mode, pool, i:0, score:0, wrongs:[], answered:false, label };
+  if(mode==="ta"){
+    st.left = TA_SECONDS*10;
+    $("q-fill").className = "fill time";
+    timer = setInterval(()=>{
+      st.left--;
+      $("q-fill").style.width = (st.left/(TA_SECONDS*10)*100)+"%";
+      $("q-mode").textContent = "残り " + Math.ceil(st.left/10) + "秒";
+      if(st.left<=0){ stopTimer(); finish(); }
+    },100);
+  } else {
+    $("q-fill").className = "fill";
+  }
+  show("scr-quiz");
+  renderQ();
+}
+
+function q(){ return st.pool[st.i]; }
+
+function renderQ(){
+  st.answered = false;
+  const c = q();
+  $("q-no").textContent = st.mode==="ta" ? "どんどん答えよう!" : `第${st.i+1}問 / ${st.pool.length}`;
+  $("q-mode").textContent = st.mode==="ta" ? ("残り "+Math.ceil(st.left/10)+"秒") : st.label;
+  $("q-score").textContent = "○ " + st.score;
+  if(st.mode!=="ta") $("q-fill").style.width = (st.i/st.pool.length*100)+"%";
+  const sym = c.icon.startsWith("bin-") ? c.icon : "item-"+c.icon;
+  $("q-icon").setAttribute("href", "#"+sym);
+  $("q-drop").style.display = c.blood ? "block" : "none";
+  $("q-name").textContent = c.item;
+  $("q-situ").textContent = c.situ;
+  $("fb").hidden = true;
+  $("toast").className = "toast";
+  renderBins();
+}
+
+function renderBins(){
+  const wrap = $("bins");
+  wrap.className = "bins";
+  wrap.innerHTML = "";
+  BIN_ORDER.forEach((id, idx)=>{
+    const b = BINS[id];
+    const btn = document.createElement("button");
+    btn.className = "binbtn" + (idx===BIN_ORDER.length-1 ? " wide" : "");
+    btn.dataset.bin = id;
+    btn.innerHTML = `<svg aria-hidden="true"><use href="#${b.sym}"/></svg>${b.name}<small>${b.sub}</small>`;
+    btn.addEventListener("click", ()=>answer(id, btn));
+    wrap.appendChild(btn);
+  });
+}
+
+function answer(binId, btn){
+  if(st.answered) return;
+  st.answered = true;
+  const c = q();
+  const ok = binId === c.ans;
+  const wrap = $("bins");
+  wrap.classList.add("lock");
+  wrap.querySelectorAll(".binbtn").forEach(el=>{
+    if(el.dataset.bin===c.ans) el.classList.add("right");
+    else if(el===btn) el.classList.add("picked-wrong");
+  });
+  if(ok){
+    st.score++;
+    if(st.mode==="weak") store.clearWrong(c.id);
+  } else {
+    st.wrongs.push(c);
+    if(st.mode!=="weak") store.addWrong(c.id);
+  }
+  $("q-score").textContent = "○ " + st.score;
+
+  if(st.mode==="ta"){
+    const t = $("toast");
+    t.textContent = ok ? "○ 正解!" : "× " + BINS[c.ans].name + " でした";
+    t.className = "toast " + (ok?"ok":"ng");
+    setTimeout(()=>{ if(st && st.mode==="ta" && st.left>0){ nextQ(); } }, ok?550:1400);
+  } else {
+    const fb = $("fb");
+    fb.className = "fb " + (ok?"ok":"ng");
+    $("fb-mark").textContent = ok ? "○" : "×";
+    $("fb-word").textContent = ok ? "正解!" : "残念…";
+    $("fb-correct").innerHTML = ok ? "" :
+      `<svg aria-hidden="true"><use href="#${BINS[c.ans].sym}"/></svg><span>正解は「${BINS[c.ans].name}」</span>`;
+    $("fb-expl").textContent = c.expl;
+    $("btn-next").textContent = (st.i+1 >= st.pool.length) ? "結果を見る" : "次へ";
+    fb.hidden = false;
+    fb.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+}
+
+function nextQ(){
+  st.i++;
+  if(st.mode==="ta"){
+    if(st.i >= st.pool.length){ st.pool = shuffle(QUESTIONS); st.i = 0; }
+    renderQ();
+    return;
+  }
+  if(st.i >= st.pool.length){ finish(); } else { renderQ(); }
+}
+$("btn-next").addEventListener("click", nextQ);
+
+/* ---------- 結果 ---------- */
+function finish(){
+  stopTimer();
+  const head = $("result-head");
+  const total = st.mode==="ta" ? st.score + st.wrongs.length : st.pool.length;
+  let html = "";
+  if(st.mode==="test"){
+    const pass = st.score >= 8;
+    html += `<div><span class="stamp ${pass?"good":"bad"}">${pass?"合格!":"もう一歩"}</span></div>`;
+    html += `<div class="bigscore">${st.score}<small> / ${st.pool.length} 問</small></div>`;
+    html += `<div class="submsg">${pass?"すばらしい! 分別マスターです":"解説を読んでもう一回チャレンジ!"}</div>`;
+  } else if(st.mode==="ta"){
+    let best = "";
+    if(st.score > store.data.bestTA){ store.data.bestTA = st.score; store.save(); best = " ベスト更新!"; }
+    html += `<div class="bigscore">${st.score}<small> 問正解</small></div>`;
+    html += `<div class="submsg">60秒 ・ ${total}問中${best}</div>`;
+  } else {
+    const rate = total ? Math.round(st.score/total*100) : 0;
+    html += `<div class="bigscore">${st.score}<small> / ${total} 問 (${rate}%)</small></div>`;
+    html += `<div class="submsg">${rate===100?"パーフェクト!":"間違えた問題は下で復習しよう"}</div>`;
+  }
+  head.innerHTML = html;
+
+  const w = $("result-wrongs");
+  if(st.wrongs.length){
+    let list = `<div class="wronghead">間違えた問題 (${st.wrongs.length})</div>`;
+    st.wrongs.forEach(c=>{
+      list += `<div class="wrongitem"><span class="t">${c.item}</span> <span style="color:var(--sub)">(${c.situ})</span><br>` +
+              `→ <span class="a">${BINS[c.ans].name}</span><br>${c.expl}</div>`;
+    });
+    w.innerHTML = list;
+  } else {
+    w.innerHTML = "";
+  }
+  show("scr-result");
+}
+$("btn-retry").addEventListener("click", ()=>{
+  if(st.mode==="practice") start("practice", shuffle(st.rawPool||st.pool), st.label);
+  else if(st.mode==="test") startTest();
+  else if(st.mode==="ta") startTA();
+  else startWeak();
+});
+
+/* ---------- モード開始 ---------- */
+function startTest(){ start("test", shuffle(QUESTIONS).slice(0,10), "テスト"); }
+function startTA(){ start("ta", shuffle(QUESTIONS), "タイムアタック"); }
+function startWeak(){
+  const ids = store.weakIds();
+  const pool = QUESTIONS.filter(c=>ids.includes(String(c.id)));
+  if(!pool.length){ goHome(); return; }
+  start("weak", shuffle(pool), "苦手復習");
+}
+$("btn-test").addEventListener("click", startTest);
+$("btn-ta").addEventListener("click", startTA);
+$("btn-weak").addEventListener("click", startWeak);
+$("btn-zukan").addEventListener("click", ()=>{ renderZukan(); show("scr-zukan"); });
+
+$("btn-practice").addEventListener("click", ()=>{
+  const list = $("catlist");
+  list.innerHTML = "";
+  CATS.forEach(cat=>{
+    const pool = cat.key==="all" ? QUESTIONS : QUESTIONS.filter(c=>c.cat===cat.key);
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.innerHTML = `<span class="ic" style="background:${cat.color}">${cat.mark}</span>` +
+                    `<span class="bd">${cat.name}<small>${cat.desc} ・ ${pool.length}問</small></span>`;
+    btn.addEventListener("click", ()=>{
+      const p = shuffle(pool);
+      start("practice", p, cat.name);
+      st.rawPool = pool;
+    });
+    list.appendChild(btn);
+  });
+  show("scr-cats");
+});
+
+/* ---------- 図鑑 ---------- */
+function renderZukan(){
+  const wrap = $("zukanlist");
+  wrap.innerHTML = "";
+  ZUKAN.forEach(z=>{
+    const b = BINS[z.bin];
+    const el = document.createElement("div");
+    el.className = "zcard";
+    el.innerHTML = `<svg aria-hidden="true"><use href="#${b.sym}"/></svg>` +
+      `<div><h3>${b.name}</h3>` +
+      `<ul class="zin">${z.items.map(t=>`<li>${t}</li>`).join("")}</ul>` +
+      (z.warn ? `<p class="warn">⚠ ${z.warn}</p>` : "") +
+      `</div>`;
+    wrap.appendChild(el);
+  });
+}
+
+goHome();
+</script>
+</body>
+</html>
