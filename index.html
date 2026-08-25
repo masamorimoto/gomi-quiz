@@ -212,7 +212,7 @@ button:focus-visible{outline:3px solid #4a7fd4;outline-offset:2px}
     </button>
     <button class="btn" id="btn-test">
       <span class="ic" style="background:#fdf3d5">試</span>
-      <span class="bd">テスト(10問)<small>ランダム10問。8問正解で合格!</small></span>
+      <span class="bd">テスト(10問)<small>ランダム10問。全問正解で合格!</small></span>
     </button>
     <button class="btn" id="btn-ta">
       <span class="ic" style="background:#fbe0dc">速</span>
@@ -449,7 +449,7 @@ function finish(){
   const total = st.mode==="ta" ? st.score + st.wrongs.length : st.pool.length;
   let html = "";
   if(st.mode==="test"){
-    const pass = st.score >= 8;
+    const pass = st.score === st.pool.length;
     html += `<div><span class="stamp ${pass?"good":"bad"}">${pass?"合格!":"もう一歩"}</span></div>`;
     html += `<div class="bigscore">${st.score}<small> / ${st.pool.length} 問</small></div>`;
     html += `<div class="submsg">${pass?"すばらしい! 分別マスターです":"解説を読んでもう一回チャレンジ!"}</div>`;
