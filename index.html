@@ -379,7 +379,7 @@ function renderQ(){
 
 function renderBins(){
   const wrap = $("bins");
-  wrap.className = "bins" + (st.mode === "test" ? " notips" : "");
+  wrap.className = "bins" + (st.mode === "practice" ? "" : " notips");
   wrap.innerHTML = "";
   BIN_ORDER.forEach((id, idx)=>{
     const b = BINS[id];
